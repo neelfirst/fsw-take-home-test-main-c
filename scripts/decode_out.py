@@ -28,19 +28,21 @@ def get_packets(hexlist):
   '''
   indices = []
   packets = []
+
   # TODO: switch to while when converting to C
   for i in range(len(hexlist)):
     if hexlist[i] == HEADER[0] and hexlist[i:i+len(HEADER)] == HEADER:
       indices.append(i)
+
   for i in range(len(indices)):
     start = indices[i]
 
     # sometimes, there just isn't a better solution. OR IS THERE
     if i+1 == len(indices):
-      end = len(indices)
+      end = len(hexlist)
     else:
       end = indices[i+1]
-
+    print(start,end)
     packets.append(hexlist[start:end])
   return packets
 
@@ -63,7 +65,7 @@ if __name__ == "__main__":
         if valid(packet):
           f.write(set_format(packet))
     '''
-#    print(hex_in)
+    print(hex_in)
     print(packets)
   except Exception as e:
     print(e)
