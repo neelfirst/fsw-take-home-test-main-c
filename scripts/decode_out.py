@@ -46,27 +46,34 @@ def get_packets(hexlist):
     packets.append(hexlist[start:end])
   return packets
 
+def valid(packet):
+  # Even though the packets are split by valid headers, we add a header check
+  # just in case an evil unit tester decides to test this function someday.
+  if packet[0] != START0:
+    return False
+  if packet[1] != START1:
+    return False
+
+  length = int(packet[2], 16)
+  if (len(packet) == length + 3):
+    return True
+  else:
+    return False
+
 if __name__ == "__main__":
   parser = argparse.ArgumentParser("Process sample serial data, stored in binary hex format.")
   parser.add_argument("--input", type=str)
   parser.add_argument("--output", type=str)
   args = parser.parse_args()
-  print(args)
-  try:
-    # convert input file to array of hex bytes
-    hex_in = ingest(args.input)
 
-    # get all packets as array of arrays
-    packets = get_packets(hex_in)
-    '''
-    # validate all packets, print if validated
-    with open(args.__output,'w') as f:
-      for packet in packets:
-        if valid(packet):
-          f.write(set_format(packet))
-    '''
-    print(hex_in)
-    print(packets)
-  except Exception as e:
-    print(e)
+  # convert input file to array of hex bytes
+  hex_in = ingest(args.input)
 
+  # get all packets as array of arrays
+  packets = get_packets(hex_in)
+
+  # validate all packets, print if validated
+  with open(args.output,'w') as f:
+    for packet in packets:
+      if valid(packet):
+        f.write(set_format(packet))
