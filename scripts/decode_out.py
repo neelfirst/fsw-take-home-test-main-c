@@ -11,6 +11,10 @@ START0 = b'21'
 START1 = b'22'
 HEADER = [START0, START1]
 
+# I'm always nagging my team to refactor in place, so here.
+def get_length(packet):
+  return int(packet[2],16)
+
 def ingest(file):
   with open(file,'rb') as f:
     x = []
@@ -54,11 +58,18 @@ def valid(packet):
   if packet[1] != START1:
     return False
 
-  length = int(packet[2], 16)
+  length = get_length(packet)
   if (len(packet) == length + 3):
     return True
   else:
     return False
+
+def set_format(packet):
+  length = get_length(packet)
+  line = "{" + "{:>3}".format(length) + "} "
+  for p in packet[3:]:
+    line += "{:02x} ".format(int(p,16))
+  return line.upper() + "\n"
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser("Process sample serial data, stored in binary hex format.")
