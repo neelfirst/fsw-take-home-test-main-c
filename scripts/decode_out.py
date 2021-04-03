@@ -2,6 +2,10 @@
 '''
 This inefficient python script serves as a sanity check
 that we're correctly ingesting and processing files.
+
+Update: after learning just how grossly I misread the prompt,
+this script doesn't even accomplish the intended purpose. Writing
+in Py was easier but now its pointless to even fix. Behold my illiteracy.
 '''
 
 import binascii
@@ -11,7 +15,6 @@ START0 = b'21'
 START1 = b'22'
 HEADER = [START0, START1]
 
-# I'm always nagging my team to refactor in place, so here.
 def get_length(packet):
   return int(packet[2],16)
 
@@ -35,7 +38,7 @@ def get_packets(hexlist):
 
   # TODO: switch to while when converting to C
   for i in range(len(hexlist)):
-    if hexlist[i] == HEADER[0] and hexlist[i:i+len(HEADER)] == HEADER:
+    if hexlist[i] == HEADER[0] and hexlist[i+1] == HEADER[1]:
       indices.append(i)
 
   for i in range(len(indices)):
@@ -46,7 +49,6 @@ def get_packets(hexlist):
       end = len(hexlist)
     else:
       end = indices[i+1]
-    print(start,end)
     packets.append(hexlist[start:end])
   return packets
 
@@ -66,9 +68,9 @@ def valid(packet):
 
 def set_format(packet):
   length = get_length(packet)
-  line = "{" + "{:>3}".format(length) + "} "
+  line = "{" + "{:>3}".format(length) + "}"
   for p in packet[3:]:
-    line += "{:02x} ".format(int(p,16))
+    line += " {:02x}".format(int(p,16))
   return line.upper() + "\n"
 
 if __name__ == "__main__":
