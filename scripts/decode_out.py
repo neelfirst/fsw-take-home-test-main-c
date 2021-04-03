@@ -2,10 +2,6 @@
 '''
 This inefficient python script serves as a sanity check
 that we're correctly ingesting and processing files.
-
-Update: after learning just how grossly I misread the prompt,
-this script doesn't even accomplish the intended purpose. Writing
-in Py was easier but now its pointless to even fix. Behold my illiteracy.
 '''
 
 import binascii
@@ -60,6 +56,7 @@ def valid(packet):
   if packet[1] != START1:
     return False
 
+  # I apparently can't read instructions. This check is too stringent.
   length = get_length(packet)
   if (len(packet) == length + 3):
     return True
@@ -88,5 +85,9 @@ if __name__ == "__main__":
   # validate all packets, print if validated
   with open(args.output,'w') as f:
     for packet in packets:
-      if valid(packet):
-        f.write(set_format(packet))
+#      if valid(packet):
+      l = get_length(packet)
+      try:
+        f.write(set_format(packet[0:l+3]))
+      except:
+        print(packet)

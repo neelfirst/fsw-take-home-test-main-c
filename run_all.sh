@@ -22,6 +22,4 @@ python3 scripts/data.py --file data/extra_data.cc
 diff data/2_packets.cc data/2_packets.outpy
 diff data/10_short_packets.cc data/10_short_packets.outpy
 diff data/200_packets.cc data/200_packets.outpy
-
-# this last check is pointless due to my rtfm issues.
-# diff data/extra_data.cc data/extra_data.outpy
+diff data/extra_data.cc data/extra_data.outpy
