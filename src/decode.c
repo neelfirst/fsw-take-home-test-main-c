@@ -6,6 +6,29 @@
 const unsigned char START0 = 0x21;
 const unsigned char START1 = 0x22;
 
+bool valid (FILE *stream, const unsigned char packet[], const unsigned int length)
+{
+  // packet too long
+  char peek0 = fgetc(stream);
+  char peek1 = fgetc(stream);
+  if (peek1 != EOF) ungetc(peek1, stream);
+  if (peek0 != EOF) ungetc(peek0, stream);
+
+  if (peek0 == EOF) return true;
+  else if (peek1 == EOF) return false; // peek0 is an extra char, invalidating the packet
+  else if (peek0 == START0 && peek1 == START1) return true;
+  else { // now we need to check if our packet is too short,
+         // e.g. there is another start header within this packet
+    for (int i = 3; i < length; i++) {
+      if (packet[i] == START0 && packet[i] == START1) {
+        fseek(stream, i-(length+1), SEEK_CUR);
+        return false;
+      }
+    }
+    return true;
+  }
+}
+
 int main (int argc, char **argv)
 {
   if (argc != 5 || strcmp(argv[1],"--input") != 0 || strcmp(argv[3],"--output") != 0) {
@@ -35,42 +58,22 @@ int main (int argc, char **argv)
       unsigned char packet[length];
       if (fread(packet, length, 1, infile) == length) {
         printf("eof or packet read error");
-        break;
       }
       else {
-        fprintf(outfile, "{ %03u } ", length);
-        for (int i=0; i<length; i++) fprintf(outfile, "%02X ", packet[i]);
-        fprintf(outfile, "\n");
+        if (valid(infile, packet, length)) {
+          fprintf(outfile, "{%3d} ", length);
+          for (int i=0; i<length; i++) fprintf(outfile, "%02X ", packet[i]);
+          fprintf(outfile, "\n");
+        }
       }
     }
 
-    if (seekHeader && byte[0] == START1) {
-      gotHeader = true;
-      printf("got header\n");
-    }
+    if (seekHeader && byte[0] == START1) gotHeader = true;
     else gotHeader = false;
 
-    if (byte[0] == START0) {
-      seekHeader = true;
-      printf("got start0, now seeking header\n");
-    }
+    if (byte[0] == START0) seekHeader = true;
     else seekHeader = false;
   }
-
-
-  // convert input file to array of hex bytes
-  // unsigned char *hex_in = ingest(infile)
-
-/*
-  # get all packets as array of arrays
-  packets = get_packets(hex_in)
-
-  # validate all packets, print if validated
-  with open(args.output,'w') as f:
-    for packet in packets:
-      if valid(packet):
-        f.write(set_format(packet))
-*/
   return 0;
 }
 
