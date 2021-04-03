@@ -56,10 +56,17 @@ int main (int argc, char **argv)
       gotHeader = false;
       unsigned int length = (unsigned int)(byte[0]);
       unsigned char packet[length];
-      if (fread(packet, length, 1, infile) == length) {
-        printf("eof or packet read error");
+      bool read_success = false;
+      /* Well I learned something new today. fread doesn't return bytes_read
+         anymore, it just returns 1 for a success. gcc 9.3 on WSL U20. */
+      if (fread(packet, length, 1, infile) != 1) {
+        /* apparently you can haz zero length valid packets. sneaky. */
+        if (length == 0) read_success = true;
+        else read_success = false;
       }
-      else {
+      else read_success = true;
+
+      if (read_success) {
         if (valid(infile, packet, length)) {
           fprintf(outfile, "{%3d} ", length);
           for (int i=0; i<length; i++) fprintf(outfile, "%02X ", packet[i]);
