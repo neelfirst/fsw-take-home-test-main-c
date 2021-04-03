@@ -67,7 +67,7 @@ int main (int argc, char **argv)
       else read_success = true;
 
       if (read_success) {
-        if (valid(infile, packet, length)) {
+        if (true /*valid(infile, packet, length)*/) {
           fprintf(outfile, "{%3d} ", length);
           for (int i=0; i<length; i++) fprintf(outfile, "%02X ", packet[i]);
           fprintf(outfile, "\n");
